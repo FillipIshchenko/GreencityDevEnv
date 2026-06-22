@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
+cd "$(dirname "$0")"
+REPOS=(
+  "GreenCityUser|https://github.com/GreenCity-UA-4823-4826/GreenCityUser.git"
+  "GreenCityMVP|https://github.com/GreenCity-UA-4823-4826/GreenCityMVP.git"
+  "GreenCityClient|https://github.com/ita-social-projects/GreenCityClient.git"
+)
 GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[1;33m'; NC='\033[0m'
 info() { echo -e "${GREEN}[startup]${NC} $*"; }
 warn() { echo -e "${YELLOW}[startup]${NC} $*"; }
@@ -12,7 +17,17 @@ docker info >/dev/null 2>&1           || fail "Docker daemon is not running"
 docker compose version >/dev/null 2>&1 || fail "'docker compose' (v2 plugin) is required"
 
 [ -f .env ] || warn "no .env file found — compose will fall back to built-in dev defaults"
-
+for entry in "${REPOS[@]}"; do
+  dir="${entry%%|*}"
+  url="${entry##*|}"
+  if [ -d "$dir/.git" ]; then
+    info "Pulling latest $dir ..."
+    git -C "$dir" pull --ff-only
+  else
+    info "Cloning $dir ..."
+    git clone "$url" "$dir"
+  fi
+done
 info "Building images (first run downloads dependencies — this can take a while) ..."
 docker compose build
 
