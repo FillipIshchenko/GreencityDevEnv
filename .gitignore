@@ -1,0 +1,6 @@
+/GreenCityUser/
+/GreenCityMVP/
+/GreenCityClient/
+.env
+.env.*
+!.env.example
