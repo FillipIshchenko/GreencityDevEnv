@@ -29,12 +29,14 @@ timestamps {
                     dir(repoPath) {
                         withSonarQubeEnv('greencity-sonar') {
                             sh """
-                                mvn -B -ntp clean verify sonar:sonar \\
-                                    -DskipTests \\
-                                    -Dformatter.skip=true \\
-                                    -Dcheckstyle.skip=true \\
-                                    -Dspotless.check.skip=true \\
-                                    -Dsonar.projectKey=${repoName} \\
+                                mvn -B -ntp clean verify sonar:sonar \
+                                    -DskipTests \
+                                    -Dformatter.skip=true \
+                                    -Dcheckstyle.skip=true \
+                                    -Dspotless.check.skip=true \
+                                    -Dsonar.host.url="$SONAR_HOST_URL" \
+                                    -Dsonar.token="$SONAR_AUTH_TOKEN" \
+                                    -Dsonar.projectKey=${repoName} \
                                     -Dsonar.projectName=${repoName}
                             """
                         }
