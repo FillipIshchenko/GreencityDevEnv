@@ -40,18 +40,7 @@ services:
   greencity-core:
     build:
       context: ../repos/GreenCityMVP
-      dockerfile_inline: |
-        FROM maven:3.9-eclipse-temurin-21 AS build
-        WORKDIR /app
-        COPY . .
-        RUN mvn -B -ntp clean package -DskipTests \
-            -Dformatter.skip=true -Dcheckstyle.skip=true -Dspotless.check.skip=true
-        RUN cp "$(find ./core -path '*/target/*.jar' -not -name '*sources*' -not -name '*javadoc*' | head -n 1)" /app/app.jar
-        FROM eclipse-temurin:21-jre
-        WORKDIR /runner
-        COPY --from=build /app/app.jar /runner/app.jar
-        EXPOSE 8080
-        CMD ["java", "-jar", "/runner/app.jar"]
+      dockerfile: Dockerfile.greencity-ci
     container_name: greencity-core
     restart: unless-stopped
     depends_on:
@@ -94,18 +83,7 @@ services:
   greencity-user:
     build:
       context: ../repos/GreenCityUser
-      dockerfile_inline: |
-        FROM maven:3.9-eclipse-temurin-21 AS build
-        WORKDIR /app
-        COPY . .
-        RUN mvn -B -ntp clean package -DskipTests \
-            -Dformatter.skip=true -Dcheckstyle.skip=true -Dspotless.check.skip=true
-        RUN cp "$(find ./core -path '*/target/*.jar' -not -name '*sources*' -not -name '*javadoc*' | head -n 1)" /app/app.jar
-        FROM eclipse-temurin:21-jre
-        WORKDIR /runner
-        COPY --from=build /app/app.jar /runner/app.jar
-        EXPOSE 8060
-        CMD ["java", "-jar", "/runner/app.jar"]
+      dockerfile: Dockerfile.greencity-ci
     container_name: greencity-user
     restart: unless-stopped
     depends_on:
@@ -211,8 +189,10 @@ services:
       - "4200:80"
     networks:
       - greencity-app
+
 volumes:
   pgdata:
+
 networks:
   greencity-app:
     name: greencity-app
