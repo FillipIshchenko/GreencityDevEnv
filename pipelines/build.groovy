@@ -35,9 +35,9 @@ timestamps {
                                     -Dcheckstyle.skip=true \
                                     -Dspotless.check.skip=true \
                                     -Dsonar.host.url=http://sonarqube:9000 \
-                                    -Dsonar.token=\${SONAR_TOKEN} \
-                                    -Dsonar.projectKey=${repoName} \
-                                    -Dsonar.projectName=${repoName}
+                                    -Dsonar.token="${SONAR_TOKEN}" \
+                                    -Dsonar.projectKey="${repoName}" \
+                                    -Dsonar.projectName="${repoName}"
                             '''
                         }
                     }
