@@ -25,21 +25,21 @@ timestamps {
             }
 
             if (runGate) {
-                withSonarQubeEnv('greencity-sonar') {
-                    stage('Build & Sonar scan (Java)') {
-                        dir(repoPath) {
-                            withEnv(["SONAR_PROJECT=${repoName}", "SONAR_METADATA=${env.WORKSPACE}/report-task.txt"]) {
+                dir(repoPath) {
+                    withSonarQubeEnv('greencity-sonar') {
+                        stage('Build & Sonar scan (Java)') {
+                            withEnv(["SONAR_PROJECT=${repoName}"]) {
                                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                                    sh 'mvn -B -ntp clean verify sonar:sonar -DskipTests -Dformatter.skip=true -Dcheckstyle.skip=true -Dspotless.check.skip=true -Dsonar.host.url=http://sonarqube:9000 -Dsonar.token=$SONAR_TOKEN -Dsonar.projectKey=$SONAR_PROJECT -Dsonar.projectName=$SONAR_PROJECT -Dsonar.scanner.metadataFilePath=$SONAR_METADATA'
+                                    sh 'mvn -B -ntp clean verify sonar:sonar -DskipTests -Dformatter.skip=true -Dcheckstyle.skip=true -Dspotless.check.skip=true -Dsonar.host.url=http://sonarqube:9000 -Dsonar.token=$SONAR_TOKEN -Dsonar.projectKey=$SONAR_PROJECT -Dsonar.projectName=$SONAR_PROJECT'
                                 }
                             }
                         }
-                    }
 
-                    stage('Quality Gate') {
-                        echo "Waiting for SonarQube quality gate result ..."
-                        timeout(time: 10, unit: 'MINUTES') {
-                            waitForQualityGate abortPipeline: true
+                        stage('Quality Gate') {
+                            echo "Waiting for SonarQube quality gate result ..."
+                            timeout(time: 10, unit: 'MINUTES') {
+                                waitForQualityGate abortPipeline: true
+                            }
                         }
                     }
                 }
