@@ -27,23 +27,26 @@ timestamps {
             if (runGate) {
                 stage('Build & Sonar scan (Java)') {
                     dir(repoPath) {
-                        withSonarQubeEnv('greencity-sonar') {
-                            sh """
+                        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                            sh '''
                                 mvn -B -ntp clean verify sonar:sonar \
                                     -DskipTests \
                                     -Dformatter.skip=true \
                                     -Dcheckstyle.skip=true \
                                     -Dspotless.check.skip=true \
-                                    -Dsonar.host.url="$SONAR_HOST_URL" \
-                                    -Dsonar.token="$SONAR_AUTH_TOKEN" \
-                                    -Dsonar.projectKey=${repoName} \
-                                    -Dsonar.projectName=${repoName}
-                            """
+                                    -Dsonar.host.url=http://sonarqube:9000 \
+                                    -Dsonar.token="$SONAR_TOKEN" \
+                                    -Dsonar.projectKey="$REPO_NAME" \
+                                    -Dsonar.projectName="$REPO_NAME"
+                            '''
                         }
                     }
                 }
 
                 stage('Quality Gate') {
+                    withSonarQubeEnv('greencity-sonar') {
+                        echo "Waiting for SonarQube quality gate result ..."
+                    }
                     timeout(time: 10, unit: 'MINUTES') {
                         waitForQualityGate abortPipeline: true
                     }
