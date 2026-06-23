@@ -91,6 +91,9 @@ echo "Quality gate PASSED."
             }
 
             stage('Rebuild & Restart app service') {
+                if (runGate) {
+                    sh "cp /workspace/app/Dockerfile.greencity-java ${repoPath}/Dockerfile.greencity-ci"
+                }
                 sh "${compose} build ${service}"
                 sh "${compose} up -d ${service}"
             }
