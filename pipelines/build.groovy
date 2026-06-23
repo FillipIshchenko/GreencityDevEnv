@@ -63,9 +63,9 @@ ANALYSIS_ID=$(echo "$CE_JSON" | grep -o '"analysisId":"[^"]*"' | head -1 | cut -
 echo "Analysis id: $ANALYSIS_ID"
 
 if [ -n "$ANALYSIS_ID" ]; then
-  GATE_JSON=$(curl -s -u "$SONAR_TOKEN:" "$SONAR_URL/api/qualitygate/project_status?analysisId=$ANALYSIS_ID")
+  GATE_JSON=$(curl -s -u "$SONAR_TOKEN:" "$SONAR_URL/api/qualitygates/project_status?analysisId=$ANALYSIS_ID")
 else
-  GATE_JSON=$(curl -s -u "$SONAR_TOKEN:" "$SONAR_URL/api/qualitygate/project_status?projectKey=$SONAR_PROJECT")
+  GATE_JSON=$(curl -s -u "$SONAR_TOKEN:" "$SONAR_URL/api/qualitygates/project_status?projectKey=$SONAR_PROJECT")
 fi
 echo "Gate API response: $GATE_JSON"
 
