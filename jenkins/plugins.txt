@@ -5,6 +5,7 @@ configuration-as-code
 job-dsl
 sonar
 credentials
+credentials-binding
 ws-cleanup
 timestamper
 ansicolor
