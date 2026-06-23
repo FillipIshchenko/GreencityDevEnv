@@ -3,7 +3,6 @@ def repos = [
     [name: 'GreenCityMVP',    dir: 'GreenCityMVP',    gate: true ],
     [name: 'GreenCityClient', dir: 'GreenCityClient', gate: false],
 ]
-
 repos.each { repo ->
     pipelineJob("build-${repo.name}") {
         description("""
@@ -16,12 +15,6 @@ repos.each { repo ->
             scm('* * * * *')
         }
 
-        environmentVariables {
-            env('REPO_NAME', repo.name)
-            env('REPO_DIR',  repo.dir)
-            env('RUN_GATE',  repo.gate.toString())
-        }
-
         definition {
             cps {
                 sandbox(true)
@@ -30,6 +23,11 @@ repos.each { repo ->
                         pipelineTriggers([pollSCM('* * * * *')])
                     ])
                     node {
+                        // Make the repo identity available to build.groovy.
+                        env.REPO_NAME = '${repo.name}'
+                        env.REPO_DIR  = '${repo.dir}'
+                        env.RUN_GATE  = '${repo.gate}'
+
                         stage('Checkout working clone') {
                             checkout([
                                 \$class: 'GitSCM',
@@ -38,7 +36,7 @@ repos.each { repo ->
                                 extensions: [[\$class: 'LocalBranch', localBranch: '**']]
                             ])
                         }
-                        // Hand off to the shared declarative-ish pipeline logic.
+                        // Hand off to the shared pipeline logic.
                         load '/workspace/pipelines/build.groovy'
                     }
                 """.stripIndent())
