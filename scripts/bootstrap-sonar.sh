@@ -5,7 +5,7 @@ cd "$(dirname "$0")/.."
 SONAR_URL="${SONAR_URL:-http://localhost:9000}"
 DEFAULT_USER="admin"
 DEFAULT_PASS="admin"
-NEW_PASS="${SONAR_ADMIN_PASSWORD:-Admin12345!}"
+NEW_PASS="${SONAR_ADMIN_PASSWORD:-Admin123456!}"
 JENKINS_WEBHOOK="${JENKINS_WEBHOOK:-http://jenkins:8080/sonarqube-webhook/}"
 ENV_FILE=".env"
 
