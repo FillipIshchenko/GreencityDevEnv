@@ -1,6 +1,8 @@
-/GreenCityUser/
-/GreenCityMVP/
-/GreenCityClient/
+/repos/GreenCityUser/
+/repos/GreenCityMVP/
+/repos/GreenCityClient/
+/repos/.upstream-status
 .env
 .env.*
 !.env.example
+

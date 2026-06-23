@@ -1,0 +1,50 @@
+jenkins:
+  systemMessage: "GreenCity local dev environment — managed by JCasC. Do not configure by hand."
+  numExecutors: 2
+  mode: NORMAL
+  scmCheckoutRetryCount: 2
+
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID}"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+unclassified:
+  sonarGlobalConfiguration:
+    buildWrapperEnabled: true
+    installations:
+      - name: "greencity-sonar"
+        serverUrl: "http://sonarqube:9000"
+        # Token is injected from the credential below.
+        credentialsId: "sonar-token"
+        triggers:
+          skipScmCause: false
+          skipUpstreamCause: false
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - string:
+              scope: GLOBAL
+              id: "sonar-token"
+              secret: "${SONAR_TOKEN}"
+              description: "SonarQube analysis token"
+
+jobs:
+  - script: >
+      job('seed') {
+        description('Generates the GreenCity pipeline jobs from Job-DSL.')
+        steps {
+          dsl {
+            external('/var/jenkins_jobs/*.groovy')
+            removeAction('DELETE')
+          }
+        }
+      }
