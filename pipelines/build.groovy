@@ -46,9 +46,11 @@ TASK_ID=$(grep '^ceTaskId=' target/sonar/report-task.txt | cut -d= -f2)
 echo "Sonar CE task id: $TASK_ID"
 
 STATUS=PENDING
+CE_JSON=
 while [ "$STATUS" = "PENDING" ] || [ "$STATUS" = "IN_PROGRESS" ]; do
   sleep 3
-  STATUS=$(curl -s -u "$SONAR_TOKEN:" "$SONAR_URL/api/ce/task?id=$TASK_ID" | grep -o '"status":"[A-Z]*"' | head -1 | cut -d'"' -f4)
+  CE_JSON=$(curl -s -u "$SONAR_TOKEN:" "$SONAR_URL/api/ce/task?id=$TASK_ID")
+  STATUS=$(echo "$CE_JSON" | grep -o '"status":"[A-Z_]*"' | head -1 | cut -d'"' -f4)
   echo "CE task status: $STATUS"
 done
 
@@ -57,7 +59,17 @@ if [ "$STATUS" != "SUCCESS" ]; then
   exit 1
 fi
 
-GATE=$(curl -s -u "$SONAR_TOKEN:" "$SONAR_URL/api/qualitygate/project_status?projectKey=$SONAR_PROJECT" | grep -o '"status":"[A-Z]*"' | head -1 | cut -d'"' -f4)
+ANALYSIS_ID=$(echo "$CE_JSON" | grep -o '"analysisId":"[^"]*"' | head -1 | cut -d'"' -f4)
+echo "Analysis id: $ANALYSIS_ID"
+
+if [ -n "$ANALYSIS_ID" ]; then
+  GATE_JSON=$(curl -s -u "$SONAR_TOKEN:" "$SONAR_URL/api/qualitygate/project_status?analysisId=$ANALYSIS_ID")
+else
+  GATE_JSON=$(curl -s -u "$SONAR_TOKEN:" "$SONAR_URL/api/qualitygate/project_status?projectKey=$SONAR_PROJECT")
+fi
+echo "Gate API response: $GATE_JSON"
+
+GATE=$(echo "$GATE_JSON" | grep -o '"status":"[A-Z]*"' | head -1 | cut -d'"' -f4)
 echo "Quality gate status: $GATE"
 
 if [ "$GATE" != "OK" ]; then
