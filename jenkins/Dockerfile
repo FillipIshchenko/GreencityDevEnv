@@ -1,4 +1,4 @@
-FROM jenkins/jenkins:2.479.3-lts-jdk21
+FROM jenkins/jenkins:2.541.3-lts-jdk21
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates curl gnupg git jq maven \
