@@ -29,6 +29,7 @@ timestamps {
                     dir(repoPath) {
                         withEnv(["SONAR_PROJECT=${repoName}"]) {
                             withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                                sh 'echo "DEBUG token length: ${#SONAR_TOKEN} ; first3: ${SONAR_TOKEN:0:3} ; project: $SONAR_PROJECT"'
                                 sh 'mvn -B -ntp clean verify sonar:sonar -DskipTests -Dformatter.skip=true -Dcheckstyle.skip=true -Dspotless.check.skip=true -Dsonar.host.url=http://sonarqube:9000 -Dsonar.token=$SONAR_TOKEN -Dsonar.projectKey=$SONAR_PROJECT -Dsonar.projectName=$SONAR_PROJECT'
                             }
                         }
