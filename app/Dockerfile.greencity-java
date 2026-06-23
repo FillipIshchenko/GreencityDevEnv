@@ -1,0 +1,9 @@
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /app
+COPY . .
+RUN mvn -B -ntp clean package -DskipTests -Dformatter.skip=true -Dcheckstyle.skip=true -Dspotless.check.skip=true
+RUN cp "$(find ./core -path '*/target/*.jar' -not -name '*sources*' -not -name '*javadoc*' | head -n 1)" /app/app.jar
+FROM eclipse-temurin:21-jre
+WORKDIR /runner
+COPY --from=build /app/app.jar /runner/app.jar
+CMD ["java", "-jar", "/runner/app.jar"]
