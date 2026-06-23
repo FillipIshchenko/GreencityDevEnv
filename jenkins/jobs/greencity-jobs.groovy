@@ -3,6 +3,7 @@ def repos = [
     [name: 'GreenCityMVP',    dir: 'GreenCityMVP',    gate: true ],
     [name: 'GreenCityClient', dir: 'GreenCityClient', gate: false],
 ]
+
 repos.each { repo ->
     pipelineJob("build-${repo.name}") {
         description("""
@@ -11,6 +12,7 @@ repos.each { repo ->
             and on success rebuilds + restarts the app stack.
             Triggered when you <code>git commit</code> in repos/${repo.dir}.
         """.stripIndent())
+
         triggers {
             scm('* * * * *')
         }
@@ -23,7 +25,6 @@ repos.each { repo ->
                         pipelineTriggers([pollSCM('* * * * *')])
                     ])
                     node {
-                        // Make the repo identity available to build.groovy.
                         env.REPO_NAME = '${repo.name}'
                         env.REPO_DIR  = '${repo.dir}'
                         env.RUN_GATE  = '${repo.gate}'
@@ -36,7 +37,6 @@ repos.each { repo ->
                                 extensions: [[\$class: 'LocalBranch', localBranch: '**']]
                             ])
                         }
-                        // Hand off to the shared pipeline logic.
                         load '/workspace/pipelines/build.groovy'
                     }
                 """.stripIndent())
@@ -44,6 +44,7 @@ repos.each { repo ->
         }
     }
 }
+
 pipelineJob('upstream-notify') {
     description('''
         Every 5 minutes, fetches upstream (origin) for all three repos and
