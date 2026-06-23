@@ -20,9 +20,9 @@ Compose v2 plugin(I recommend atleast 8GBs or RAM).
 ## Startup
 
 ```bash
-git clone <URL>
+git clone https://github.com/FillipIshchenko/GreencityDevEnv
 cd GreencityDevEnv
-./setup.sh           # or: make setup
+./setup.sh
 ```
 
 Then:
