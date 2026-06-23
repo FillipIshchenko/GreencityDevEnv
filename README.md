@@ -13,7 +13,7 @@ A self-contained, Dockerised dev environment for the GreenCity project:
   when the source repos have new commits — without ever touching their work.
 
 Everything runs in containers. The only host requirements are Docker + the
-Compose v2 plugin(I recommend atleast 8GBs or RAM).
+Compose v2 plugin(I recommend atleast 12GBs of RAM).
 
 ---
 
