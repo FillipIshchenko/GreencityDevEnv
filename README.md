@@ -31,7 +31,7 @@ Then:
 | Service    | URL                     | Default login            |
 |------------|-------------------------|--------------------------|
 | Jenkins    | http://localhost:8081   | `admin` / `admin`        |
-| SonarQube  | http://localhost:9000   | `admin` / `Admin12345!`  |
+| SonarQube  | http://localhost:9000   | `admin` / `Admin123456!` |
 | App (UI)   | http://localhost:4200   | —                        |
 | Core API   | http://localhost:8080   | —                        |
 | User API   | http://localhost:8060   | —                        |
