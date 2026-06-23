@@ -25,22 +25,22 @@ timestamps {
             }
 
             if (runGate) {
-                stage('Build & Sonar scan (Java)') {
-                    dir(repoPath) {
-                        withEnv(["SONAR_PROJECT=${repoName}"]) {
-                            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                                sh 'mvn -B -ntp clean verify sonar:sonar -DskipTests -Dformatter.skip=true -Dcheckstyle.skip=true -Dspotless.check.skip=true -Dsonar.host.url=http://sonarqube:9000 -Dsonar.token=$SONAR_TOKEN -Dsonar.projectKey=$SONAR_PROJECT -Dsonar.projectName=$SONAR_PROJECT'
+                withSonarQubeEnv('greencity-sonar') {
+                    stage('Build & Sonar scan (Java)') {
+                        dir(repoPath) {
+                            withEnv(["SONAR_PROJECT=${repoName}"]) {
+                                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                                    sh 'mvn -B -ntp clean verify sonar:sonar -DskipTests -Dformatter.skip=true -Dcheckstyle.skip=true -Dspotless.check.skip=true -Dsonar.host.url=http://sonarqube:9000 -Dsonar.token=$SONAR_TOKEN -Dsonar.projectKey=$SONAR_PROJECT -Dsonar.projectName=$SONAR_PROJECT'
+                                }
                             }
                         }
                     }
-                }
 
-                stage('Quality Gate') {
-                    withSonarQubeEnv('greencity-sonar') {
+                    stage('Quality Gate') {
                         echo "Waiting for SonarQube quality gate result ..."
-                    }
-                    timeout(time: 10, unit: 'MINUTES') {
-                        waitForQualityGate abortPipeline: true
+                        timeout(time: 10, unit: 'MINUTES') {
+                            waitForQualityGate abortPipeline: true
+                        }
                     }
                 }
             } else {
