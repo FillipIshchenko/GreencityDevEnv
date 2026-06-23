@@ -75,10 +75,9 @@ network for the quality gate.
    - reports whether the service came back healthy.
 
 4. Watch at http://localhost:8081. If the gate fails, the run stops and
-   the previously running app is left untouched — open
-
-   http://localhost:9000 (project = the repo name) to see what to fix.
-5. **Push when you decide.** Nothing is pushed automatically:
+   the previously running app is left untouched —
+   open http://localhost:9000 to see what to fix.
+6. **Push when you decide.** Nothing is pushed automatically:
 
    ```bash
    git -C repos/GreenCityMVP push origin <your-branch>
