@@ -33,7 +33,7 @@ services:
     networks:
       - greencity-ci
   sonarqube:
-    image: sonarqube:10.6-community
+    image: sonarqube:26.6.0.123539-community
     container_name: greencity-sonarqube
     restart: unless-stopped
     environment:
