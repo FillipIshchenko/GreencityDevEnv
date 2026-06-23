@@ -1,0 +1,34 @@
+FROM node:18.19.0 AS build
+WORKDIR /app
+ARG PRODUCTION ENABLE_GREENCITY ENABLE_UBS BACKEND_LINK BACKEND_USER_LINK
+ARG BACKEND_CHAT_LINK BACKEND_UBS_LINK BACKEND_UBS_ADMIN_LINK SOCKET USER_SOCKET
+ARG UBS_SOCKET FRONTEND_LINK API_KEYS API_MAP_KEY AGM_CORE_MODULE_API_KEY GOOGLE_CLIENT_ID
+COPY package*.json ./
+RUN npm ci --legacy-peer-deps
+COPY . .
+RUN printf '%s\n' \
+    "PRODUCTION=$PRODUCTION" \
+    "ENABLE_GREENCITY=$ENABLE_GREENCITY" \
+    "ENABLE_UBS=$ENABLE_UBS" \
+    "BACKEND_LINK=$BACKEND_LINK" \
+    "BACKEND_USER_LINK=$BACKEND_USER_LINK" \
+    "BACKEND_CHAT_LINK=$BACKEND_CHAT_LINK" \
+    "BACKEND_UBS_LINK=$BACKEND_UBS_LINK" \
+    "BACKEND_UBS_ADMIN_LINK=$BACKEND_UBS_ADMIN_LINK" \
+    "SOCKET=$SOCKET" \
+    "USER_SOCKET=$USER_SOCKET" \
+    "UBS_SOCKET=$UBS_SOCKET" \
+    "FRONTEND_LINK=$FRONTEND_LINK" \
+    "API_KEYS=$API_KEYS" \
+    "API_MAP_KEY=$API_MAP_KEY" \
+    "AGM_CORE_MODULE_API_KEY=$AGM_CORE_MODULE_API_KEY" \
+    "GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID" > .env
+RUN cp .env .env.prod
+RUN npm run config && npm run config prod
+RUN npx ng build --configuration production
+FROM nginx:1.21.6-alpine AS runner
+RUN rm -rf /usr/share/nginx/html/index.html
+COPY --from=build /app/dist/GreenCityClient/ /usr/share/nginx/html/
+COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
