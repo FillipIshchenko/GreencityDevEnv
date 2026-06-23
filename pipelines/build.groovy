@@ -26,19 +26,47 @@ timestamps {
 
             if (runGate) {
                 dir(repoPath) {
-                    withSonarQubeEnv('greencity-sonar') {
-                        stage('Build & Sonar scan (Java)') {
-                            withEnv(["SONAR_PROJECT=${repoName}"]) {
-                                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                                    sh 'mvn -B -ntp clean verify sonar:sonar -DskipTests -Dformatter.skip=true -Dcheckstyle.skip=true -Dspotless.check.skip=true -Dsonar.host.url=http://sonarqube:9000 -Dsonar.token=$SONAR_TOKEN -Dsonar.projectKey=$SONAR_PROJECT -Dsonar.projectName=$SONAR_PROJECT'
-                                }
+                    stage('Build & Sonar scan (Java)') {
+                        withEnv(["SONAR_PROJECT=${repoName}"]) {
+                            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                                sh 'mvn -B -ntp clean verify sonar:sonar -DskipTests -Dformatter.skip=true -Dcheckstyle.skip=true -Dspotless.check.skip=true -Dsonar.host.url=http://sonarqube:9000 -Dsonar.token=$SONAR_TOKEN -Dsonar.projectKey=$SONAR_PROJECT -Dsonar.projectName=$SONAR_PROJECT'
                             }
                         }
+                    }
 
-                        stage('Quality Gate') {
-                            echo "Waiting for SonarQube quality gate result ..."
-                            timeout(time: 10, unit: 'MINUTES') {
-                                waitForQualityGate abortPipeline: true
+                    stage('Quality Gate') {
+                        echo "Checking SonarQube quality gate via API ..."
+                        withEnv(["SONAR_PROJECT=${repoName}"]) {
+                            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                                timeout(time: 10, unit: 'MINUTES') {
+                                    sh '''
+set -e
+SONAR_URL=http://sonarqube:9000
+TASK_ID=$(grep '^ceTaskId=' target/sonar/report-task.txt | cut -d= -f2)
+echo "Sonar CE task id: $TASK_ID"
+
+STATUS=PENDING
+while [ "$STATUS" = "PENDING" ] || [ "$STATUS" = "IN_PROGRESS" ]; do
+  sleep 3
+  STATUS=$(curl -s -u "$SONAR_TOKEN:" "$SONAR_URL/api/ce/task?id=$TASK_ID" | grep -o '"status":"[A-Z]*"' | head -1 | cut -d'"' -f4)
+  echo "CE task status: $STATUS"
+done
+
+if [ "$STATUS" != "SUCCESS" ]; then
+  echo "SonarQube analysis task did not succeed (status: $STATUS)"
+  exit 1
+fi
+
+GATE=$(curl -s -u "$SONAR_TOKEN:" "$SONAR_URL/api/qualitygate/project_status?projectKey=$SONAR_PROJECT" | grep -o '"status":"[A-Z]*"' | head -1 | cut -d'"' -f4)
+echo "Quality gate status: $GATE"
+
+if [ "$GATE" != "OK" ]; then
+  echo "Quality gate FAILED (status: $GATE). See $SONAR_URL/dashboard?id=$SONAR_PROJECT"
+  exit 1
+fi
+echo "Quality gate PASSED."
+'''
+                                }
                             }
                         }
                     }
