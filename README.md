@@ -60,7 +60,7 @@ network for the quality gate.
 
 ## The dev workflow
 
-1. **Edit code** in `repos/GreenCityMVP` (or `GreenCityUser` / `GreenCityClient`).
+1. **Edit code** in `GreencityDevEnv/repos/GreenCityMVP` (or `GreenCityUser` / `GreenCityClient`).
 
 2. **Commit locally** — no push required:
    ```bash
